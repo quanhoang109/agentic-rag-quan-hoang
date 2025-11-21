@@ -2,7 +2,29 @@
 
 ## Step-by-Step Guide
 
-### Part 1: Create Virtual Environment
+### Part 1: Install uv Package Manager
+
+**Why uv?** uv is a modern, fast Python package manager (10-100x faster than pip) developed by Astral. It simplifies dependency management and virtual environments.
+
+```bash
+# Install uv using pip
+pip install uv
+
+# Verify installation
+uv --version
+# Should show: uv 0.x.x
+```
+
+**Alternative installation methods:**
+```bash
+# macOS/Linux (recommended):
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell):
+irm https://astral.sh/uv/install.ps1 | iex
+```
+
+### Part 2: Create Virtual Environment with uv
 
 **Why?** Virtual environments isolate project dependencies from your system Python.
 
@@ -10,27 +32,26 @@
 # Navigate to project root
 cd /path/to/agentic-rag
 
-# Create virtual environment
-python -m venv venv
+# Create virtual environment using uv (much faster!)
+uv venv
 
 # Activate virtual environment
 # On macOS/Linux:
-source venv/bin/activate
+source .venv/bin/activate
 
 # On Windows:
-venv\Scripts\activate
+.venv\Scripts\activate
 
-# You should see (venv) in your terminal prompt
+# You should see (.venv) in your terminal prompt
 ```
 
-### Part 2: Install Dependencies
+**Note:** uv creates `.venv` by default (not `venv`). Both work fine!
+
+### Part 3: Install Dependencies with uv
 
 ```bash
-# Ensure pip is up to date
-pip install --upgrade pip
-
-# Install all required packages
-pip install -r requirements.txt
+# Install all required packages using uv (10-100x faster than pip!)
+uv pip install -r requirements.txt
 
 # This will install:
 # - openai-agents (multi-agent framework)
@@ -43,13 +64,27 @@ pip install -r requirements.txt
 # - and more...
 ```
 
+**Why uv is faster:**
+- Parallel downloads
+- Optimized resolver
+- Cached dependencies
+- Native code (written in Rust)
+
 **Verification:**
 ```bash
-pip list | grep openai
+uv pip list | grep openai
 # Should show: openai, openai-agents
 ```
 
-### Part 3: Set Up Environment Variables
+**Alternative (using standard pip):**
+If you prefer traditional pip:
+```bash
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+```
+
+### Part 4: Set Up Environment Variables
 
 **1. Create .env file:**
 ```bash
@@ -97,7 +132,7 @@ GOOGLE_SHEETS_URL=your-sheet-url
 - Regenerate if accidentally exposed
 - The .env file is already in .gitignore
 
-### Part 4: Verify Installation
+### Part 5: Verify Installation
 
 Run the verification script:
 
@@ -108,6 +143,7 @@ python lessons/lesson-01-setup/solution/verify.py
 **Expected output:**
 ```
 ✓ Python version: 3.10.x (OK)
+✓ uv: Installed (uv 0.x.x)
 ✓ Virtual environment: Active
 ✓ OpenAI package: Installed (version 1.99.9)
 ✓ OpenAI Agents SDK: Installed (version 0.2.8)
@@ -123,7 +159,7 @@ All checks passed! ✅
 Your environment is ready for Lesson 2.
 ```
 
-### Part 5: Test OpenAI Connection
+### Part 6: Test OpenAI Connection
 
 Quick test to ensure API key works:
 
@@ -155,23 +191,27 @@ Expected: `✓ Embedding generated: 1536 dimensions`
 
 ## Common Issues
 
-### Issue 1: "pip: command not found"
-**Solution:** Ensure Python is installed correctly
+### Issue 1: "uv: command not found"
+**Solution:** Install uv package manager
 ```bash
-python -m ensurepip --upgrade
+pip install uv
+# Or use curl (recommended):
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### Issue 2: "Permission denied"
-**Solution:** Use user installation
+**Solution:** Use uv with virtual environment (automatically isolated)
 ```bash
-pip install --user -r requirements.txt
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 ### Issue 3: "ModuleNotFoundError: No module named 'dotenv'"
 **Solution:** Virtual environment not activated
 ```bash
-source venv/bin/activate  # Activate first
-pip install python-dotenv
+source .venv/bin/activate  # Activate first (uv creates .venv)
+uv pip install python-dotenv
 ```
 
 ### Issue 4: "AuthenticationError: Invalid API key"
@@ -195,8 +235,8 @@ load_dotenv()  # Loads from current directory
 
 ### 1. Always Activate Virtual Environment
 ```bash
-# Before working on project
-source venv/bin/activate
+# Before working on project (uv uses .venv by default)
+source .venv/bin/activate
 
 # To deactivate when done
 deactivate
@@ -204,23 +244,34 @@ deactivate
 
 ### 2. Keep Dependencies Updated
 ```bash
-# Check for outdated packages
-pip list --outdated
+# Check for outdated packages with uv
+uv pip list --outdated
 
 # Update specific package
-pip install --upgrade openai
+uv pip install --upgrade openai
+
+# Or update all packages
+uv pip install --upgrade -r requirements.txt
 ```
 
-### 3. Environment Variable Naming
+### 3. Why Choose uv?
+- **Speed:** 10-100x faster than pip
+- **Reliability:** Better dependency resolution
+- **Caching:** Intelligent package caching
+- **Modern:** Built with Rust for performance
+- **Compatible:** Works with pip and PyPI
+
+### 4. Environment Variable Naming
 - Use UPPERCASE for environment variables
 - Separate words with underscores
 - Be descriptive: `OPENAI_API_KEY` not `KEY`
 
-### 4. .gitignore
+### 5. .gitignore
 Ensure these are in .gitignore:
 ```
 .env
 venv/
+.venv/  # uv virtual environment
 __pycache__/
 *.pyc
 db/
@@ -249,8 +300,9 @@ Once your environment is set up:
 
 ## Additional Resources
 
+- [uv documentation](https://docs.astral.sh/uv/)
+- [uv GitHub repository](https://github.com/astral-sh/uv)
 - [Python venv documentation](https://docs.python.org/3/library/venv.html)
-- [pip user guide](https://pip.pypa.io/en/stable/user_guide/)
 - [OpenAI API documentation](https://platform.openai.com/docs)
 - [python-dotenv documentation](https://pypi.org/project/python-dotenv/)
 

@@ -19,13 +19,30 @@ def check_python_version():
         return False
 
 def check_virtual_env():
-    """Check if virtual environment is active."""
+    """Check if uv virtual environment is active."""
+    # Check for uv venv or standard venv
     if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
         print("✓ Virtual environment: Active")
         return True
     else:
         print("⚠ Virtual environment: Not detected (recommended but optional)")
         return True
+
+def check_uv_installed():
+    """Check if uv package manager is installed."""
+    import subprocess
+    try:
+        result = subprocess.run(['uv', '--version'], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            print(f"✓ uv: Installed ({version})")
+            return True
+        else:
+            print("⚠ uv: Not found (install with: pip install uv)")
+            return True  # Not mandatory
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        print("⚠ uv: Not found (install with: pip install uv)")
+        return True  # Not mandatory
 
 def check_package(package_name, import_name=None):
     """Check if a package is installed."""
@@ -105,6 +122,9 @@ def main():
     # Check Python version
     checks.append(check_python_version())
 
+    # Check uv package manager
+    checks.append(check_uv_installed())
+
     # Check virtual environment
     checks.append(check_virtual_env())
 
@@ -147,7 +167,9 @@ def main():
         print("Please review the errors above and fix them.")
         print()
         print("Common fixes:")
-        print("  - Install packages: pip install -r requirements.txt")
+        print("  - Install uv: pip install uv")
+        print("  - Install packages: uv pip install -r requirements.txt")
+        print("  - Or use pip: pip install -r requirements.txt")
         print("  - Create .env file: cp .env.example .env")
         print("  - Add your OpenAI API key to .env file")
     print("=" * 60)
